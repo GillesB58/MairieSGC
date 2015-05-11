@@ -1,0 +1,91 @@
+<?php
+
+/**
+ * @file
+ * Dewslider diaporama with CCK Image Field.
+ *
+ */
+
+/**
+ * Implementation of hook_field_formatter_info().
+ *
+ * Add dewslider diaporama.
+ */
+function imagefield_dewslider_field_formatter_info() {
+  $formatters = array();
+  $formatters['imagefield_dewslider'] = array(
+      'label' => 'Dewslider',
+      'field types' => array('filefield'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
+    );
+
+  return $formatters;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function imagefield_dewslider_theme() {
+  $theme = array();
+  $theme['imagefield_dewslider_formatter_imagefield_dewslider'] = array(
+      'file' => 'imagefield_dewslider.formatter.inc',
+      'function' => 'theme_imagefield_dewslider_formatter_imagefield',
+      'arguments' => array('element' => NULL),
+    );
+  $theme['imagefield_dewslider_dewslider'] = array(
+    'file' => 'imagefield_dewslider.formatter.inc',
+    'arguments' => array('nid' => NULL, 'field_name' => NULL, 'teaser' => NULL),
+  );
+  return $theme;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function imagefield_dewslider_menu() {
+  $items['admin/settings/imagefield_dewslider'] = array(
+    'title' => 'Imagefield Dewslider',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imagefield_dewslider_admin_settings'),
+    'access arguments' => array('administer imagefield_dewslider'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'imagefield_dewslider.admin.inc',
+    );
+  $items['imagefield_dewslider/%node/%/%'] = array(
+    'title' => 'Imagefield Dewslider',
+    'page callback' => 'imagefield_dewslider_xml',
+    'page arguments' => array(1, 2, 3),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'imagefield_dewslider.pages.inc',
+    );
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function imagefield_dewslider_perm() {
+  return array('administer imagefield_dewslider');
+}
+
+function imagefield_dewslider_get_options($field_name, $teaser) {
+  $options = variable_get('imagefield_dewslider_options', array());
+  $options = isset($options[$field_name][$teaser?'teaser':'full'])?$options[$field_name][$teaser?'teaser':'full']:array();
+  $default=reset(imagecache_presets());
+  $options += array(
+    'width' => 640,
+    'height' => 480,
+    'imagecache' => $default['presetname'],
+    'showbuttons' => 'yes',
+    'showtitles' => 'yes',
+    'trimtitles' => 0,
+  	'randomstart' => 'no',
+    'timer' => 5,
+    'aligntitles' => 'bottom',
+    'alignbuttons' => 'bottom',
+    'transition' => 'push',
+    'speed' => 20,
+  );
+  return $options;
+}
